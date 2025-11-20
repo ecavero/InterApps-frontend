@@ -3,7 +3,10 @@ import ErrorMessage from "../components/ErrorMessage"
 
 export default function ProfileView() {
 
-    const {register, handleSubmit, formState: {errors}} = useForm({defaultValues: {handle: ''}})
+    const {register, handleSubmit, formState: {errors}} = useForm({defaultValues: 
+                                                                  {handle: '',
+                                                                  descripcion: ''
+                                                                 }})
     const handleUserProfileForm = () => {
             console.log('desde handleUserProfileForm')
     }
@@ -35,7 +38,11 @@ export default function ProfileView() {
                 <textarea
                     className="border-none bg-slate-100 rounded-lg p-2"
                     placeholder="Tu Descripción"
+                    {...register('descripcion', {
+                            required: "La descrpción es obligatoria"
+                        })}
                 />
+                {errors.descripcion && <ErrorMessage>{errors.descripcion.message}</ErrorMessage>}
             </div>
 
             <div className="grid grid-cols-1 gap-2">
