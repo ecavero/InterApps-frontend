@@ -43,11 +43,11 @@ export default function ProfileView() {
                 <textarea
                     className="border-none bg-slate-100 rounded-lg p-2"
                     placeholder="Tu Descripción"
-                    {...register('descripcion', {
+                    {...register('description', {
                             required: "La descrpción es obligatoria"
                         })}
                 />
-                {errors.descripcion && <ErrorMessage>{errors.descripcion.message}</ErrorMessage>}
+                {errors.description && <ErrorMessage>{errors.description.message}</ErrorMessage>}
             </div>
 
             <div className="grid grid-cols-1 gap-2">
