@@ -1,7 +1,8 @@
 import { useForm } from "react-hook-form"
 import ErrorMessage from "../components/ErrorMessage"
-import { useQueryClient } from "@tanstack/react-query"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import type {ProfileForm, User} from '../types'
+import { updateProfile } from "../api/DevTreeAPI"
 
 export default function ProfileView() {
     const queryClient = useQueryClient()
@@ -12,8 +13,18 @@ export default function ProfileView() {
                                                                   {handle: data.handle,
                                                                    description: data.description
                                                                  }})
-            const handleUserProfileForm = (formData: ProfileForm) => {
-            console.log(formData)
+    const updateProfileMutation = useMutation({
+            mutationFn: updateProfile,
+            onError: () => {
+                    console.log('Hubo un error')                    
+            },
+            onSuccess: () => {
+                    console.log('todo bien')
+            }
+    })
+            
+    const handleUserProfileForm = (formData: ProfileForm) => {
+            updateProfileMutation.mutate(formData)
     }
     return (
         <form 
