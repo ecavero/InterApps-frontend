@@ -1,9 +1,43 @@
-import React from 'react';
+import { Switch } from "@headlessui/react";
+import type { DevTreeLink } from "../types";
+import { classNames } from "../utils";
 
-export default function DevTreeInput() {
+type DevTreeInputProps = {
+    item: DevTreeLink;
+    handleUrlChange : (e : React.ChangeEvent<HTMLInputElement>) => void;
+    handleEnableLink : (socialNetwork: string) => void;
+};
+
+export default function DevTreeInput({item, handleUrlChange, handleEnableLink}: DevTreeInputProps) {
     return (
-        <div>
-            DevTreeInput
+        <div className="bg-white shadow-sm p-5 flex items-center gap-3">
+            <div 
+            className="w-12 h-12 bg-cover"
+            style={{backgroundImage: `url('/social/icon_${item.name}.svg')`}}
+            ></div>
+            <input
+                type="text"
+                className="flex-1 border border-gray-100 rounded-lg"
+                value={item.url}    
+                onChange={handleUrlChange}
+                name={item.name} //en cual red social estoy escribiendo para actualizar la url de la red social
+            />
+
+            <Switch
+                checked={item.enabled}
+                onChange={()=>handleEnableLink(item.name)} //le pasamos el nombre de la red social que queremos habilitar o deshabilitar
+                className={classNames(
+                    item.enabled ? 'bg-blue-500' : 'bg-gray-200',
+                    'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none'
+                )}
+            >
+                    <span
+                    className={classNames(
+                        item.enabled ? 'translate-x-5' : 'translate-x-0',
+                        'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out'
+                    )}
+                    />
+            </Switch>
         </div>
     );
 }

@@ -12,9 +12,9 @@ export default function ProfileView() {
     console.log(data)
 
     const {register, handleSubmit, formState: {errors}} = useForm<ProfileForm>({defaultValues: 
-                                                                  {handle: data.handle,
-                                                                   description: data.description
-                                                                 }})
+        {handle: data.handle,
+            description: data.description
+        }})
     const updateProfileMutation = useMutation({
             mutationFn: updateProfile,
             onError: (error) => {
@@ -51,8 +51,12 @@ export default function ProfileView() {
 
             
     const handleUserProfileForm = (formData: ProfileForm) => {
-            updateProfileMutation.mutate(formData)
+        const user : User = queryClient.getQueryData(['user'])!
+        user.description = formData.description //va a tener el ultimo valor del formulario
+        user.handle = formData.handle
+        updateProfileMutation.mutate(user)
     }
+    
     return (
         <form 
             className="bg-white p-10 rounded-lg space-y-5"
