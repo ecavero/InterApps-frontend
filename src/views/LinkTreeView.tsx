@@ -5,7 +5,7 @@ import { isValidUrl } from "../utils";
 import { toast } from "sonner";
 import { useMutation,useQueryClient } from "@tanstack/react-query";
 import { updateProfile } from "../api/DevTreeAPI";
-import type { User } from "../types";
+import type { SocialNetwork, User } from "../types";
 
 export default function LinkTreeView(){
     const [devTreeLinks, setDevTreeLinks] = useState(social);
@@ -29,9 +29,9 @@ export default function LinkTreeView(){
         // console.log(devTreeLinks)
         // console.log(JSON.parse(user.links))
         const updatedData = devTreeLinks.map(item => {
-            const userlink = JSON.parse(user.links).find(link => link.name === item.name)
+            const userlink = JSON.parse(user.links).find((link: SocialNetwork) => link.name === item.name)
             if(user.links){
-                return {...item, url: userlink, enabled: userlink.enabled}
+                return {...item, url: userlink.url, enabled: userlink.enabled}
             }
             return item
         })
@@ -50,7 +50,16 @@ export default function LinkTreeView(){
         //actualiza el estado con la nueva lista de enlaces
         setDevTreeLinks(updatedLinks)
 
+        queryClient.setQueryData(['user'], (prevData: User) =>{
+            return {
+                ...prevData,
+                links: JSON.stringify(updatedLinks)
+            }
+        })
+
     }
+
+    const links: SocialNetwork[] = JSON.parse(user.links)
 
     const handleEnableLink = (socialNetwork: string) => {
         //console.log(socialNetwork)
@@ -60,7 +69,7 @@ export default function LinkTreeView(){
                 if(isValidUrl(link.url)){
                     return {...link, enabled: !link.enabled}
                 }else{
-                    toast.error("Please enter a valid URL before enabling the link.")   
+                    toast.error("URL no valida")   
                 }
             }
             return link
@@ -68,10 +77,59 @@ export default function LinkTreeView(){
 
         //console.log(updatedLinks)
         setDevTreeLinks(updatedLinks)
+        
+        let updatedItems: SocialNetwork[] = []
+
+        const selectedSocialNetwork = updatedLinks.find(link => link.name === socialNetwork)
+        if(selectedSocialNetwork?.enabled){
+
+            const id = links.filter(link => link.id).length + 1
+
+            if(links.some(link => link.name === socialNetwork)) {
+                updatedItems = links.map(link =>{
+                    if(link.name===socialNetwork){
+                        return {
+                            ...link,
+                            enabled: true,
+                            id
+                        }
+                    }else{
+                        return link
+                    }
+                })
+            }else {
+                const newItem = {
+                    ...selectedSocialNetwork,
+                    id
+                }
+                updatedItems = [...links, newItem]
+            }
+            
+        } else{
+            const indexToUpdate = links.findIndex(link => link.name === socialNetwork)
+            updatedItems = links.map(link => {
+                if(link.name === socialNetwork){
+                    return {
+                    ...link,
+                    id:0,
+                    enabled: false
+                    }
+                }else if(link.id > indexToUpdate){
+                    return {
+                        ...link,
+                        id: link.id-1
+                    }
+                } else {
+                    return link
+                }
+                
+            })  
+    }
+
         queryClient.setQueryData(['user'], (prevData: User) => {
             return {
                 ...prevData,
-                links: JSON.stringify(updatedLinks) //etos links son un arreglo, por eso los convertimos a string
+                links: JSON.stringify(updatedItems) //etos links son un arreglo, por eso los convertimos a string
             }
         })
         
