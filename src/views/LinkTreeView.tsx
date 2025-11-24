@@ -5,7 +5,7 @@ import { isValidUrl } from "../utils";
 import { toast } from "sonner";
 import { useMutation,useQueryClient } from "@tanstack/react-query";
 import { updateProfile } from "../api/DevTreeAPI";
-import type { User } from "../types";
+import type { SocialNetwork, User } from "../types";
 
 export default function LinkTreeView(){
     const [devTreeLinks, setDevTreeLinks] = useState(social);
@@ -29,7 +29,7 @@ export default function LinkTreeView(){
         // console.log(devTreeLinks)
         // console.log(JSON.parse(user.links))
         const updatedData = devTreeLinks.map(item => {
-            const userlink = JSON.parse(user.links).find(link => link.name === item.name)
+            const userlink = JSON.parse(user.links).find((link: SocialNetwork) => link.name === item.name)
             if(user.links){
                 return {...item, url: userlink, enabled: userlink.enabled}
             }
@@ -50,8 +50,19 @@ export default function LinkTreeView(){
         //actualiza el estado con la nueva lista de enlaces
         setDevTreeLinks(updatedLinks)
 
+        /*
+        queryClient.setQueryData(['user'], (prevData: User)=> {
+            return {
+                ...prevData,
+                limks: JSON.stringify(updatedLinks)
+            }
+        })
+        */
+
     }
 
+    const links: SocialNetwork[] = JSON.parse(user.links)
+    
     const handleEnableLink = (socialNetwork: string) => {
         //console.log(socialNetwork)
         //const updatedLinks = devTreeLinks.map(link => link.name === socialNetwork ? {...link, enabled: !link.enabled} : link)
@@ -60,7 +71,7 @@ export default function LinkTreeView(){
                 if(isValidUrl(link.url)){
                     return {...link, enabled: !link.enabled}
                 }else{
-                    toast.error("Please enter a valid URL before enabling the link.")   
+                    toast.error("URL no valida")   
                 }
             }
             return link
@@ -68,10 +79,57 @@ export default function LinkTreeView(){
 
         //console.log(updatedLinks)
         setDevTreeLinks(updatedLinks)
+
+        let updateItems: SocialNetwork[] = []
+
+        const selectedSocialNetwork = updatedLinks.find(link => link.name == socialNetwork)
+        if(selectedSocialNetwork?.enabled){
+            const id = links.filter(link => link.id).length + 1
+
+            if(links.some(link => link.name === socialNetwork)){
+                updateItems = links.map(link =>{
+                    if(link.name===socialNetwork){
+                        return {
+                            ...link,
+                            enabled: true,
+                            id
+                        }
+                    }else{
+                        return link
+                    }
+                })
+            }else {
+                const newItem={
+                    ...selectedSocialNetwork,
+                    id
+                }
+                updateItems = [...links, newItem]
+            }
+        
+        } else{
+            const indexToUpdate = links.findIndex(link => link.name == socialNetwork)
+            updateItems= links.map(link => {
+                if(link.name == socialNetwork){
+                    return {
+                        ...link,
+                        id: 0,
+                        enabled: false
+                    }
+                } else if (link.id > indexToUpdate && (indexToUpdate!==0 && link.id ===1)){
+                    return {
+                        ...link,
+                        id: link.id -1
+                    }
+                } else {
+                    return link
+                }
+            })
+        }
+
         queryClient.setQueryData(['user'], (prevData: User) => {
             return {
                 ...prevData,
-                links: JSON.stringify(updatedLinks) //etos links son un arreglo, por eso los convertimos a string
+                links: JSON.stringify(updateItems) //etos links son un arreglo, por eso los convertimos a string
             }
         })
         
@@ -89,10 +147,9 @@ export default function LinkTreeView(){
                 />
             ))}
             <button
-            className="bg-cyan-400 p-2 text-lg w-full uppercase text-slate-600 rounded-lg font-bold" 
-            onClick={()=>mutate(user)}
+                className="bg-cyan-400 p-2 text-lg w-full uppercase text-slate-600 rounded-lg font-bold" 
+                onClick={()=>mutate(queryClient.getQueryData(['user'])!)}
             >Guardar Cambios</button>
-            
         </div>
     )
 }
