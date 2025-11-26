@@ -89,7 +89,13 @@ export default function DevTree({data}: DevTreeProps){
                             }
                             
                             <p className="text-center text-lg font-black text-white">{data.description}</p>
-                            <div className="mt-20 flex flex-col gap-5">
+
+                            <DndContext
+                                collisionDetection={closestCenter}
+                                onDragEnd={handleDragEnd}
+                            >  
+                                <div className="mt-20 flex flex-col gap-5">
+                               
                                 <SortableContext
                                     items={enabledLinks}
                                     strategy={verticalListSortingStrategy}
@@ -102,6 +108,7 @@ export default function DevTree({data}: DevTreeProps){
                                 
                                 
                             </div>
+                            </DndContext> 
 
                             </div>
                     </div>
