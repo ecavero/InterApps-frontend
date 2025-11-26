@@ -50,12 +50,7 @@ export default function LinkTreeView(){
         //actualiza el estado con la nueva lista de enlaces
         setDevTreeLinks(updatedLinks)
 
-        queryClient.setQueryData(['user'], (prevData: User) =>{
-            return {
-                ...prevData,
-                links: JSON.stringify(updatedLinks)
-            }
-        })
+       
 
     }
 
